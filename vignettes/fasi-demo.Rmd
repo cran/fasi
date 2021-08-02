@@ -1,0 +1,152 @@
+---
+title: "Tutorial to the FASI Package in R"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Tutorial to the FASI Package in R}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+# Implementing the Fair Adjusted Selective Inference (FASI) procedure
+  This is an R package for implementing the FASI method as described in the paper "A Fairness-Adjusted Selective Inference Framework ForClassification" by Bradley Rava, Wenguang Sun, Gareth M. James, and Xin Tong. 
+  
+# Introduction 
+  
+We consider a common classification setting where one wishes to make automated decisions for people from a variety of different protected groups. When controlling the overall false selection rate of a classifier, this error rate can unfairly be concentrated in one protected group instead of being evenly distributed among all of them. To address this, we develop a method called Fair Adjusted Selective Inference (FASI) that can simultaneously control the false selection rate for each protected group and the overall population at any user-specified level. This package is a user friendly way of implimenting the FASI algorithm.
+  
+This package will be extensively reworked soon. Please keep an eye out for version 2 when it is released. 
+  
+  
+  
+## What does the package do?
+  
+This R package implements the FASI procedure.
+  
+  
+## How is the package structured?
+  
+The package has two main functions, "fasi" and "predict". They are both described below.
+
+$\textbf{fasi:}$ The fasi function is used to create a ranking score model model that will be used in the classification step. The inputs for this function are:
+- observed_data: This is a data set of previous observations with their true classes. The fasi function will automatically split this data according to parameter split_p which the user will define.
+
+- model_formula: Write a model formula that will be given to the ML model when creating the ranking scores. The choice of model will be user specified. 
+
+- split_p: This is a number between 0 and 1 that determines the proportion of the observed data that should be reserved as the training data set. 
+
+- alg: The user can specify their choice of ranking score algorithm here. The current choices are logistic regression "logit", Adaboost "adaboost", GAM "gam", nonparametric naive bayes "nonparametric_nb", and "user-provided". "user-provided" should only be used if you want to use an algorithm that the fasi function doesn't currently support. If you pick this option, the fasi function will create a simple fasi object that will need user provided ranking scores in the next step.
+
+- class_label: What is the column name of your class label?
+
+- niter_adaboost: If you pick adaboost, you can specify the number of weak learners. If you are not using adaboost, this parameter is meaningless. 
+
+$\textbf{predict:}$ The predict function should be used after the fasi function has been called. Even if you are specifying your own ranking scores! With a fasi_object, the predict function will estimate the r-scores for each observation in your test data set (new observations) and then classify each individual according to the specified thresholds. There are a few options the user can specify for how this is done.
+- fasi_object: A fitted fasi object that can be obtained from the "fasi" function.
+
+- test_data: A data set of new observations that you want to classify according to the fasi algorithm. 
+
+- alpha_1: The desired overall and group-wise FSR control for class 1. This is a number between 0 and 1. 
+
+- alpha_2: The desired overall and group-wise FSR control for class 2. This is a number between 0 and 1.  
+
+- rscore_plus: There are two versions of the r-score that can be calculated. The r-score and r-score plus. They are described in depth in the paper. By default, the r-score plus is calculated. 
+
+- ptd_group_var: What is the column name of your protected groups?
+
+- class_label: What is the column name of your class label?
+
+- ranking_score_calibrate: If you are not using a built in ML model from the fasi function, provide the ranking scores for the calibration data set here. 
+
+- ranking_score_test: If you are not using a built in ML model from the fasi function, provide the ranking scores for the test data set here. 
+
+- indecision_choice: It is possible that there will be conflicts with the r-scores i.e. we have an observation that we are confident in placing both into class 1 and class 2. There are 3 ways we can treat this observation. Pick "1" if you want to always assign this observation to class 1. Pick "2" if you always want to assign this observation to class 2. Pick "3" if you want to always assign this observation to the indecision class. 
+  
+# Installing the package
+  
+The FASI package is available on github and can be installed through the "devtools" package. 
+  
+```{r message=FALSE, warning=FALSE, eval=FALSE}
+library(devtools)
+install_github("bradleyrava/fasi@master")
+```
+
+Once installed, you can load the package and functions into your R session with the following command
+
+```{r message=FALSE, warning=FALSE, eval=FALSE}
+library(fasi)
+```
+
+# Example
+
+For guidance and reproducibility, this package includes the 2018 census data and compas algorithm data described in the paper. The original unedited versions can be found on ProPublica's github and at UCI's machine learning repository.  
+
+https://github.com/propublica/compas-analysis/
+
+https://archive.ics.uci.edu/ml/datasets/adult
+
+Let's load the census data. 
+
+```{r message=FALSE, warning=FALSE}
+z_full <- fasi::adult
+
+## Subset the data so the package runs faster
+z <- z_full[sample(1:nrow(z_full), 0.1*nrow(z_full)), ]
+```
+
+For this example, I will use logistic regression for computing the ranking scores.
+
+Using the fasi package is easy. I will first randomly split my data into an observed and testing data set and then call the fasi function.
+
+```{r}
+obs_rows <- sample(1:nrow(z), 0.5*nrow(z))
+test_rows <- (1:nrow(z))[-obs_rows]
+
+observed_data <- z[obs_rows,]
+test_data <- z[test_rows,]
+```
+
+Now that we have an observed and test data set, I will call the fasi function and specify that I want to use logistic regression. 
+
+```{r}
+model_formula <- as.formula("y ~ age")
+fasi_object <- fasi::fasi(observed_data = observed_data, model_formula = model_formula, alg = "logit")
+```
+
+The fasi object returns a lot of useful information to us. Perhaps most importantly it gives us the model fit.
+
+```{r}
+fasi_object$model_fit
+```
+
+Let's now use the fasi object to classify the observations in our test data set. For this example, I will use alpha_1=alpha_2=0.1. In this data set, I will also use "sex" as the protected group. Since I did not change this variable name to "a", I will tell the predict function what the column name is. 
+
+```{r}
+fasi_predict <- predict(object = fasi_object, test_data = test_data, alpha_1 = 0.1, alpha_2 = 0.1, ptd_group_var = "sex")
+head(fasi_predict$r_scores)
+head(fasi_predict$classification)
+```
+
+That's it! You can use the r_scores / classifications directly.
+
+If you wanted to provide your own ranking scores, you would only need to alter the process I described above slightly. For this example I will produce random ranking scores. However, you should strive to estimate better ones if you pick this approach!
+
+```{r}
+## Random ranking scores
+calibrate_scores <- rnorm(nrow(observed_data))
+test_scores <- rnorm(nrow(test_data))
+
+fasi_object <- fasi::fasi(observed_data = observed_data, alg = "user-provided")
+fasi_predict <- predict(object = fasi_object, test_data = test_data, alpha_1 = 0.1, alpha_2 = 0.1, ptd_group_var = "sex",
+                        ranking_score_calibrate = calibrate_scores, ranking_score_test = test_scores)
+
+```
+
+## Future work
+This package is currently a proof of concept and it can be useful for practitioners looking to quickly impliment the fasi procedure. In version 2, this package will be much faster and it will allow for a cross validation method that will eliminate the need for a training / calibration testing data set. It will also offer more diagnostic / plotting tools.
+
+Please let me know if there is any functionality you would like to see added to version 2. 
+
+
+# Further questions or comments?
+
+If you have any questions about this package or notice any bugs, please feel free to email Bradley Rava at brava@usc.edu 

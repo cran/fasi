@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<title>Tutorial to the FASI Package in R</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Tutorial to the FASI Package in R</h1>
+
+
+
+<div id="implementing-the-fair-adjusted-selective-inference-fasi-procedure" class="section level1">
+<h1>Implementing the Fair Adjusted Selective Inference (FASI) procedure</h1>
+<p>This is an R package for implementing the FASI method as described in the paper “A Fairness-Adjusted Selective Inference Framework ForClassification” by Bradley Rava, Wenguang Sun, Gareth M. James, and Xin Tong.</p>
+</div>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>We consider a common classification setting where one wishes to make automated decisions for people from a variety of different protected groups. When controlling the overall false selection rate of a classifier, this error rate can unfairly be concentrated in one protected group instead of being evenly distributed among all of them. To address this, we develop a method called Fair Adjusted Selective Inference (FASI) that can simultaneously control the false selection rate for each protected group and the overall population at any user-specified level. This package is a user friendly way of implimenting the FASI algorithm.</p>
+<p>This package will be extensively reworked soon. Please keep an eye out for version 2 when it is released.</p>
+<div id="what-does-the-package-do" class="section level2">
+<h2>What does the package do?</h2>
+<p>This R package implements the FASI procedure.</p>
+</div>
+<div id="how-is-the-package-structured" class="section level2">
+<h2>How is the package structured?</h2>
+<p>The package has two main functions, “fasi” and “predict”. They are both described below.</p>
+<p><span class="math inline">\(\textbf{fasi:}\)</span> The fasi function is used to create a ranking score model model that will be used in the classification step. The inputs for this function are: - observed_data: This is a data set of previous observations with their true classes. The fasi function will automatically split this data according to parameter split_p which the user will define.</p>
+<ul>
+<li><p>model_formula: Write a model formula that will be given to the ML model when creating the ranking scores. The choice of model will be user specified.</p></li>
+<li><p>split_p: This is a number between 0 and 1 that determines the proportion of the observed data that should be reserved as the training data set.</p></li>
+<li><p>alg: The user can specify their choice of ranking score algorithm here. The current choices are logistic regression “logit”, Adaboost “adaboost”, GAM “gam”, nonparametric naive bayes “nonparametric_nb”, and “user-provided”. “user-provided” should only be used if you want to use an algorithm that the fasi function doesn’t currently support. If you pick this option, the fasi function will create a simple fasi object that will need user provided ranking scores in the next step.</p></li>
+<li><p>class_label: What is the column name of your class label?</p></li>
+<li><p>niter_adaboost: If you pick adaboost, you can specify the number of weak learners. If you are not using adaboost, this parameter is meaningless.</p></li>
+</ul>
+<p><span class="math inline">\(\textbf{predict:}\)</span> The predict function should be used after the fasi function has been called. Even if you are specifying your own ranking scores! With a fasi_object, the predict function will estimate the r-scores for each observation in your test data set (new observations) and then classify each individual according to the specified thresholds. There are a few options the user can specify for how this is done. - fasi_object: A fitted fasi object that can be obtained from the “fasi” function.</p>
+<ul>
+<li><p>test_data: A data set of new observations that you want to classify according to the fasi algorithm.</p></li>
+<li><p>alpha_1: The desired overall and group-wise FSR control for class 1. This is a number between 0 and 1.</p></li>
+<li><p>alpha_2: The desired overall and group-wise FSR control for class 2. This is a number between 0 and 1.</p></li>
+<li><p>rscore_plus: There are two versions of the r-score that can be calculated. The r-score and r-score plus. They are described in depth in the paper. By default, the r-score plus is calculated.</p></li>
+<li><p>ptd_group_var: What is the column name of your protected groups?</p></li>
+<li><p>class_label: What is the column name of your class label?</p></li>
+<li><p>ranking_score_calibrate: If you are not using a built in ML model from the fasi function, provide the ranking scores for the calibration data set here.</p></li>
+<li><p>ranking_score_test: If you are not using a built in ML model from the fasi function, provide the ranking scores for the test data set here.</p></li>
+<li><p>indecision_choice: It is possible that there will be conflicts with the r-scores i.e. we have an observation that we are confident in placing both into class 1 and class 2. There are 3 ways we can treat this observation. Pick “1” if you want to always assign this observation to class 1. Pick “2” if you always want to assign this observation to class 2. Pick “3” if you want to always assign this observation to the indecision class.</p></li>
+</ul>
+</div>
+</div>
+<div id="installing-the-package" class="section level1">
+<h1>Installing the package</h1>
+<p>The FASI package is available on github and can be installed through the “devtools” package.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(devtools)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">install_github</span>(<span class="st">&quot;bradleyrava/fasi@master&quot;</span>)</a></code></pre></div>
+<p>Once installed, you can load the package and functions into your R session with the following command</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">library</span>(fasi)</a></code></pre></div>
+</div>
+<div id="example" class="section level1">
+<h1>Example</h1>
+<p>For guidance and reproducibility, this package includes the 2018 census data and compas algorithm data described in the paper. The original unedited versions can be found on ProPublica’s github and at UCI’s machine learning repository.</p>
+<p><a href="https://github.com/propublica/compas-analysis/" class="uri">https://github.com/propublica/compas-analysis/</a></p>
+<p><a href="https://archive.ics.uci.edu/ml/datasets/adult" class="uri">https://archive.ics.uci.edu/ml/datasets/adult</a></p>
+<p>Let’s load the census data.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">z_full &lt;-<span class="st"> </span>fasi<span class="op">::</span>adult</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="co">## Subset the data so the package runs faster</span></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">z &lt;-<span class="st"> </span>z_full[<span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(z_full), <span class="fl">0.1</span><span class="op">*</span><span class="kw">nrow</span>(z_full)), ]</a></code></pre></div>
+<p>For this example, I will use logistic regression for computing the ranking scores.</p>
+<p>Using the fasi package is easy. I will first randomly split my data into an observed and testing data set and then call the fasi function.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">obs_rows &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(z), <span class="fl">0.5</span><span class="op">*</span><span class="kw">nrow</span>(z))</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">test_rows &lt;-<span class="st"> </span>(<span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(z))[<span class="op">-</span>obs_rows]</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">observed_data &lt;-<span class="st"> </span>z[obs_rows,]</a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">test_data &lt;-<span class="st"> </span>z[test_rows,]</a></code></pre></div>
+<p>Now that we have an observed and test data set, I will call the fasi function and specify that I want to use logistic regression.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">model_formula &lt;-<span class="st"> </span><span class="kw">as.formula</span>(<span class="st">&quot;y ~ age&quot;</span>)</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">fasi_object &lt;-<span class="st"> </span>fasi<span class="op">::</span><span class="kw">fasi</span>(<span class="dt">observed_data =</span> observed_data, <span class="dt">model_formula =</span> model_formula, <span class="dt">alg =</span> <span class="st">&quot;logit&quot;</span>)</a></code></pre></div>
+<p>The fasi object returns a lot of useful information to us. Perhaps most importantly it gives us the model fit.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">fasi_object<span class="op">$</span>model_fit</a></code></pre></div>
+<pre><code>## 
+## Call:  stats::glm(formula = model_formula, family = &quot;binomial&quot;, data = train_data_logit)
+## 
+## Coefficients:
+## (Intercept)          age  
+##    -2.96174      0.04686  
+## 
+## Degrees of Freedom: 813 Total (i.e. Null);  812 Residual
+## Null Deviance:       925.2 
+## Residual Deviance: 863.8     AIC: 867.8</code></pre>
+<p>Let’s now use the fasi object to classify the observations in our test data set. For this example, I will use alpha_1=alpha_2=0.1. In this data set, I will also use “sex” as the protected group. Since I did not change this variable name to “a”, I will tell the predict function what the column name is.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">fasi_predict &lt;-<span class="st"> </span><span class="kw">predict</span>(<span class="dt">object =</span> fasi_object, <span class="dt">test_data =</span> test_data, <span class="dt">alpha_1 =</span> <span class="fl">0.1</span>, <span class="dt">alpha_2 =</span> <span class="fl">0.1</span>, <span class="dt">ptd_group_var =</span> <span class="st">&quot;sex&quot;</span>)</a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="kw">head</span>(fasi_predict<span class="op">$</span>r_scores)</a></code></pre></div>
+<pre><code>##     r_score1  r_score2
+## 1 0.08061420 0.5920000
+## 2 0.13353162 0.8039003
+## 3 0.27688400 0.5567686
+## 4 0.30620155 0.8360656
+## 5 0.09752322 0.5836694
+## 6 0.01395288 0.8356950</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw">head</span>(fasi_predict<span class="op">$</span>classification)</a></code></pre></div>
+<pre><code>## [1] 1 0 0 0 1 1</code></pre>
+<p>That’s it! You can use the r_scores / classifications directly.</p>
+<p>If you wanted to provide your own ranking scores, you would only need to alter the process I described above slightly. For this example I will produce random ranking scores. However, you should strive to estimate better ones if you pick this approach!</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="co">## Random ranking scores</span></a>
+<a class="sourceLine" id="cb12-2" data-line-number="2">calibrate_scores &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="kw">nrow</span>(observed_data))</a>
+<a class="sourceLine" id="cb12-3" data-line-number="3">test_scores &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="kw">nrow</span>(test_data))</a>
+<a class="sourceLine" id="cb12-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb12-5" data-line-number="5">fasi_object &lt;-<span class="st"> </span>fasi<span class="op">::</span><span class="kw">fasi</span>(<span class="dt">observed_data =</span> observed_data, <span class="dt">alg =</span> <span class="st">&quot;user-provided&quot;</span>)</a>
+<a class="sourceLine" id="cb12-6" data-line-number="6">fasi_predict &lt;-<span class="st"> </span><span class="kw">predict</span>(<span class="dt">object =</span> fasi_object, <span class="dt">test_data =</span> test_data, <span class="dt">alpha_1 =</span> <span class="fl">0.1</span>, <span class="dt">alpha_2 =</span> <span class="fl">0.1</span>, <span class="dt">ptd_group_var =</span> <span class="st">&quot;sex&quot;</span>,</a>
+<a class="sourceLine" id="cb12-7" data-line-number="7">                        <span class="dt">ranking_score_calibrate =</span> calibrate_scores, <span class="dt">ranking_score_test =</span> test_scores)</a></code></pre></div>
+<div id="future-work" class="section level2">
+<h2>Future work</h2>
+<p>This package is currently a proof of concept and it can be useful for practitioners looking to quickly impliment the fasi procedure. In version 2, this package will be much faster and it will allow for a cross validation method that will eliminate the need for a training / calibration testing data set. It will also offer more diagnostic / plotting tools.</p>
+<p>Please let me know if there is any functionality you would like to see added to version 2.</p>
+</div>
+</div>
+<div id="further-questions-or-comments" class="section level1">
+<h1>Further questions or comments?</h1>
+<p>If you have any questions about this package or notice any bugs, please feel free to email Bradley Rava at <a href="mailto:brava@usc.edu" class="email">brava@usc.edu</a></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
